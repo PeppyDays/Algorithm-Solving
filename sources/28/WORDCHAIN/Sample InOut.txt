@@ -1,0 +1,21 @@
+# Input
+
+3
+4
+dog
+god
+dragon
+need
+3
+aa
+ab
+bb
+2
+ab
+cd
+
+# Output
+
+need dog god dragon
+aa ab bb
+IMPOSSIBLE
