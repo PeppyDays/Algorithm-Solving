@@ -44,7 +44,7 @@ def check_graph_as_euler(in_degree, out_degree):
         return True, {
             'type': 'CIRCUIT',
         }
-    elif len(in_out_diff) is 2 and set(in_out_diff.values()) == {1, 2}:
+    elif len(in_out_diff) is 2 and set(in_out_diff.values()) == {1, -1}:
         start_node = [k for k, v in in_out_diff.items() if v is -1][0]
         return True, {
             'type': 'TRAIL',
