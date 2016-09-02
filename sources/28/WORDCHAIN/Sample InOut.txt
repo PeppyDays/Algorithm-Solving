@@ -1,6 +1,6 @@
 # Input
 
-3
+4
 4
 dog
 god
@@ -13,6 +13,28 @@ bb
 2
 ab
 cd
+8
+zou
+loe
+xox
+eol
+zox
+eoz
+xol
+eou
+
+1
+9
+xox
+xxx
+xej
+jjj
+jei
+ioa
+abc
+adc
+coa
+
 
 # Output
 
