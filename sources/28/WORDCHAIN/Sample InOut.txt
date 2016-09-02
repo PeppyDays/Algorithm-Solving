@@ -1,6 +1,6 @@
 # Input
 
-4
+5
 4
 dog
 god
@@ -22,8 +22,6 @@ zox
 eoz
 xol
 eou
-
-1
 9
 xox
 xxx
@@ -38,6 +36,8 @@ coa
 
 # Output
 
-need dog god dragon
+dragon need dog god
 aa ab bb
 IMPOSSIBLE
+IMPOSSIBLE
+xxx xox xej jjj jei ioa adc coa abc
