@@ -1,12 +1,5 @@
 from collections import defaultdict
 
-N, E = [int(x) for x in input().split()]
-graph = defaultdict(list)
-
-counter = 1
-is_discovered = [None] * N
-is_cut_vertex = [False] * N
-
 
 def dfs(here, is_root):
     global counter, is_discovered, is_cut_vertex, graph
@@ -21,7 +14,7 @@ def dfs(here, is_root):
             child_cnt += 1
             ret_sub = dfs(there, False)
 
-            if not is_root and ret <= ret_sub:
+            if not is_root and ret_sub >= is_discovered[here]:
                 is_cut_vertex[here] = True
 
             ret = min(ret, ret_sub)
@@ -34,12 +27,21 @@ def dfs(here, is_root):
     return ret
 
 
+N, E = [int(x) for x in input().split()]
+graph = defaultdict(set)
+
+counter = 1
+is_discovered = [None] * N
+is_cut_vertex = [False] * N
+
 for _ in range(E):
-    i, j = [int(x) for x in input().split()]
-    graph[i].append(j)
+    u, v = [int(x) - 1 for x in input().split()]
+    graph[u].add(v)
+    graph[v].add(u)
 
-dfs(0, True)
+for here in range(N):
+    if not is_discovered[here]:
+        dfs(here, True)
 
-print(is_cut_vertex)
-
-
+print(sum([1 for x in is_cut_vertex if x]))
+print(' '.join([str(i + 1) for i, x in enumerate(is_cut_vertex) if x]))
