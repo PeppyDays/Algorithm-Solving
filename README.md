@@ -1,7 +1,13 @@
 # Algorithm-Solving
 
-알고리즘 문제 해결 전략 책의 파이썬 코드
+## 내용
 
-## 파이썬 버전
+아래 사이트들의 문제 풀이
 
-3.5.2
+- Algospot[http://www.algospot.com]
+- Jungol[http://www.jungol.co.kr]
+
+## 사용 언어
+
+- Python 3.5
+- Java 8
