@@ -7,8 +7,8 @@ import java.util.Arrays;
 public class P1459 {
 
 	static int N;
-	static int[] numbers = new int[101];
-	static boolean[] visited = new boolean[101];
+	static int[] numbers = new int[100001];
+	static boolean[] visited = new boolean[100001];
 	
 	public static void main(String[] args) throws IOException {
 		long startTime = System.currentTimeMillis();
