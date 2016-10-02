@@ -7,7 +7,8 @@ import java.util.PriorityQueue;
 public class ROUTING {
 
     static int N, M;
-    static ArrayList<Node>[] map = new ArrayList[10000];
+    @SuppressWarnings("unchecked")
+	static ArrayList<Node>[] map = new ArrayList[10000];
     static PriorityQueue<Node> q = new PriorityQueue<Node>();
     static double[] distances = new double[10000];
 
