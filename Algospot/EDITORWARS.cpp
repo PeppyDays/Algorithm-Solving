@@ -14,7 +14,7 @@ bool dis(int u, int v);
 bool ack(int u, int v);
 
 int main() {
-    freopen("/Users/donald/Documents/workspace/AlgorithmSolving/AlgorithmSolving/input.in", "r", stdin);
+    freopen("/Users/Donald/Documents/SW/SW/input.in", "r", stdin);
 
     int C;
     scanf("%d", &C);
@@ -52,13 +52,23 @@ int main() {
         if (hasContradiction)
             printf("CONTRADICTION AT %d\n", hasContradictionIdx);
         else {
-            int ret = -1;
+            int ret = 0;
             for (int i = 0; i < N; ++i)
-                ret = max(ret, size[i]);
-
-            for (int i = 0; i < N; ++i)
-                if (parent[i] == i && size[i] == 1)
+                if (parent[i] == i && size[i] == 1 && enemy[i] == -1)
                     ++ret;
+
+            for (int i = 0; i < N; ++i) {
+                if (parent[i] == i && size[i] != 1) {
+                    if (enemy[i] == -1)
+                        ret += size[i];
+                    else {
+                        if (size[i] > size[enemy[i]])
+                            ret += size[i];
+                        else if (size[i] == size[enemy[i]] && i < enemy[i])
+                            ret += size[i];
+                    }
+                }
+            }
 
             printf("MAX PARTY SIZE IS %d\n", ret);
         }
