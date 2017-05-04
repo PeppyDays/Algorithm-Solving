@@ -118,6 +118,6 @@ hs_err_pid*
 
 
 #####=== Visual Studio Code ===#####
-.vs_code/
+.vscode/
 build/
 resources/
