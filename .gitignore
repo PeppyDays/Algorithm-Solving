@@ -115,3 +115,9 @@ hs_err_pid*
 .classpath
 .project
 .settings/
+
+
+#####=== Visual Studio Code ===#####
+.vs_code/
+build/
+resources/
