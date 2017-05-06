@@ -121,3 +121,6 @@ hs_err_pid*
 .vscode/
 builds/
 resources/
+
+#####=== For my test ===#####
+Temp.cpp
