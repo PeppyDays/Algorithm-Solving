@@ -3,7 +3,7 @@
 using namespace std;
 
 // Sample input
-// 8 9
+// 8 8
 // 0 1
 // 1 2
 // 2 3
@@ -53,7 +53,6 @@ int main() {
 
     getEulerTrail(start, end, adj, trail);
     reverse(trail.begin(), trail.end());
-    trail.erase(trail.end() - 1);
     
     for (int i = 0; i < trail.size(); ++i)
         cout << trail[i] << ' ';
@@ -62,7 +61,6 @@ int main() {
 }
 
 void getEulerTrail(int start, int end, vector<vector<couple> >& adj, vector<int>& trail) {
-    adj[end].push_back(make_pair(start, true));
     getEulerCircuit(start, adj, trail);
 }
 
