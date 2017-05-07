@@ -3,6 +3,8 @@
 #include <random>
 using namespace std;
 
+// in the Windows
+
 class Node;
 
 typedef int KeyType;
