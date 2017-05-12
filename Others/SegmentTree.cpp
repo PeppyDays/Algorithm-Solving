@@ -2,59 +2,124 @@
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
 using namespace std;
 
-const int MaxN = 10;
-
 int N;
-int SegmentSum[2 * MaxN];
 
-int sum(int left, int right, int nodeIdx, int nodeLeft, int nodeRight);
-void update(int i, int val);
+class SegmentTree {
+public:
+    vector<int> tree;
+
+    SegmentTree(int n) {
+        int k = 1;
+        while (k < n)
+            k = k << 1;
+        
+        tree.resize(2 * k);
+    }
+
+    void insert(int idx, int value) {
+        idx += tree.size() / 2;
+        tree[idx] = value;
+    }
+
+    void init() {
+        for (int i = tree.size() / 2 - 1; i >= 1; --i)
+            tree[i] = tree[2 * i] + tree[2 * i + 1];
+    }
+
+    int query(int left, int right, int nIdx, int nLeft, int nRight) {
+        if (left > nRight || right < nLeft)
+            return 0;
+        
+        if (left <= nLeft && right >= nRight)
+            return tree[nIdx];
+
+        int nMid = nLeft + (nRight - nLeft) / 2;
+        int leftRet = query(left, right, 2 * nIdx, nLeft, nMid);
+        int rightRet = query(left, right, 2 * nIdx + 1, nMid + 1, nRight);
+
+        return leftRet + rightRet;
+    }
+
+    int query(int left, int right) {
+        return query(left, right, 1, 0, tree.size() / 2 - 1);
+    }
+
+    void update(int idx, int value) {
+        idx += tree.size() / 2;
+        tree[idx] = value;
+        idx /= 2;
+
+        while (idx >= 1) {
+            tree[idx] = tree[2 * idx] + tree[2 * idx + 1];
+            idx /= 2;
+        }
+    }
+};
+
+class FenwickTree {
+public:
+    vector<int> tree;
+
+    FenwickTree(int n) {
+        tree.resize(n + 1);
+    }
+
+    int query(int idx) {
+        idx++;
+        int ret = 0;
+
+        while (idx > 0) {
+            ret += tree[idx];
+            idx &= (idx - 1);
+        }
+
+        return ret;
+    }
+
+    int query(int sIdx, int eIdx) {
+        return query(eIdx) - query(sIdx - 1);
+    }
+
+    void update(int idx, int delta) {
+        idx++;
+        while (idx < tree.size()) {
+            tree[idx] += delta;
+            idx += (idx & -idx);
+        }
+    }
+};
 
 int main() {
-    freopen("/Users/donald/Documents/workspace/AlgorithmSolving/AlgorithmSolving/input.in", "r", stdin);
+    freopen("resources/input.in", "r", stdin);
     ios_base::sync_with_stdio(false);
 
     cin >> N;
-    for (int i = 0; i < N; i++)
-        cin >> SegmentSum[N + i];
+    SegmentTree st = SegmentTree(N);
+    FenwickTree ft = FenwickTree(N);
 
-    for (int i = N - 1; i >= 1; i--)
-        SegmentSum[i] = SegmentSum[2 * i] + SegmentSum[2 * i + 1];
-
-    // cout << sum(4, 7, 1, 0, N - 1) << endl;
-
-    update(2, 4);
-
-    cout << SegmentSum[1] << endl;
-
-    return 0;
-}
-
-int sum(int left, int right, int nodeIdx, int nodeLeft, int nodeRight) {
-    if (right < nodeLeft || left > nodeRight)
-        return 0;
-
-    if (left == nodeLeft && right == nodeRight)
-        return SegmentSum[nodeIdx];
-
-    int nodeMid = nodeLeft + (nodeRight - nodeLeft) / 2;
-
-    int retLeft = sum(left, min(right, nodeMid), 2 * nodeIdx, left, nodeMid);
-    int retRight = sum(max(left, nodeMid + 1), right, 2 * nodeIdx + 1, nodeMid + 1, nodeRight);
-    int ret = retLeft + retRight;
-
-    return ret;
-}
-
-void update(int idx, int val) {
-    idx += N;
-
-    while (idx >= 1) {
-        SegmentSum[idx] += val;
-        idx /= 2;
+    for (int i = 0; i < N; i++) {
+        int buf;
+        cin >> buf;
+        st.insert(i, buf);
+        ft.update(i, buf);
     }
 
-    return;
+    st.init();
+
+    st.update(2, 1);
+    ft.update(2, 4);
+
+    cout << st.query(2, 2) << '\n';
+    cout << ft.query(2, 2) << '\n';
+
+    cout << st.query(0, 3) << '\n';
+    cout << ft.query(0, 3) << '\n';
+
+    cout << st.query(0, N) << '\n';
+    cout << ft.query(0, N) << '\n';
+
+    return 0;
 }
