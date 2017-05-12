@@ -1,72 +1,109 @@
 #include <cstdio>
+#include <vector>
 #include <algorithm>
 using namespace std;
 
-const int MaxN = 1 << 20;
+int N, M, K;
 
-int n, N, M, K;
-long long Line[2 * MaxN];
+int nextInt() {
+    int buf = getchar(), ret = 0;
 
-int powUpperBound(int n);
-long long sum(int left, int right, int nIdx, int nLeft, int nRight);
-void update(int idx, long long dv);
+    while (buf < '0' || buf > '9') buf = getchar();
+    while (buf >= '0' && buf <= '9') {
+        ret = ret * 10 + (buf - '0');
+        buf = getchar();
+    }
+    return ret;
+}
+
+int nextLongLong() {
+    int buf = getchar();
+    long long ret = 0;
+    while (buf < '0' || buf > '9') buf = getchar();
+    while (buf >= '0' && buf <= '9') {
+        ret = ret * 10 + (buf - '0');
+        buf = getchar();
+    }
+    return ret;
+}
+
+class SegmentTree {
+public:
+    vector<long long> tree;
+
+    SegmentTree(int n) {
+        int k = 1;
+        while (k < n)
+            k = k << 1;
+
+        tree.resize(2 * k);
+    }
+
+    void insert(int idx, long long value) {
+        idx += tree.size() / 2;
+        tree[idx] = value;
+    }
+
+    void init() {
+        for (int i = tree.size() / 2 - 1; i >= 1; --i)
+            tree[i] = tree[2 * i] + tree[2 * i + 1];
+    }
+
+    long long query(int left, int right, int nIdx, int nLeft, int nRight) {
+        if (left > nRight || right < nLeft)
+            return 0;
+
+        if (left <= nLeft && right >= nRight)
+            return tree[nIdx];
+
+        int nMid = nLeft + (nRight - nLeft) / 2;
+
+        long long leftRet = query(left, right, 2 * nIdx, nLeft, nMid);
+        long long rightRet = query(left, right, 2 * nIdx + 1, nMid + 1, nRight);
+
+        return leftRet + rightRet;
+    }
+
+    long long query(int left, int right) {
+        return query(left, right, 1, 0, tree.size() / 2 - 1);
+    }
+
+    void update(int idx, long long delta) {
+        idx += tree.size() / 2;
+
+        while (idx >= 1) {
+            tree[idx] += delta;
+            idx /= 2;
+        }
+    }
+};
 
 int main() {
-    freopen("/Users/donald/Documents/workspace/AlgorithmSolving/AlgorithmSolving/input.in", "r", stdin);
-    // freopen("/Users/donald/Documents/workspace/AlgorithmSolving/AlgorithmSolving/output.out", "w", stdout);
+    N = nextInt();
+    M = nextInt();
+    K = nextInt();
 
-    scanf("%d %d %d", &n, &M, &K);
-    N = powUpperBound(n);
+    SegmentTree st = SegmentTree(N);
 
-    for (int i = 0; i < n; ++i)
-        scanf("%lld", Line + N + i);
+    long long inputTemp;
+    for (int i = 0; i < N; ++i) {
+        inputTemp = nextLongLong();
+        st.insert(i, inputTemp);
+    }
 
-    for (int i = n; i < N; ++i)
-        Line[N + i] = 0;
-
-    for (int i = N - 1; i >= 1; --i)
-        Line[i] = Line[2 * i] + Line[2 * i + 1];
+    st.init();
 
     int a, b, c;
     for (int i = 0; i < M + K; ++i) {
-        scanf("%d %d %d", &a, &b, &c);
+        a = nextInt();
+        b = nextInt();
+        c = nextInt();
 
         if (a - 1)
-            printf("%lld\n", sum(b - 1, c - 1, 1, 0, N - 1));
+            printf("%lld\n", st.query(b - 1, c - 1));
         else
-            update(b - 1, (long long)c - Line[N + b - 1]);
+            st.update(b - 1, (long long)c - st.query(b - 1, b - 1));
     }
 
     return 0;
-}
-
-int powUpperBound(int n) {
-    int i = 1;
-    while (i < n)
-        i *= 2;
-
-    return i;
-}
-
-long long sum(int left, int right, int nIdx, int nLeft, int nRight) {
-    if (left > nRight || right < nLeft)
-        return 0;
-
-    if (left <= nLeft && right >= nRight)
-        return Line[nIdx];
-
-    int nMid = nLeft + (nRight - nLeft) / 2;
-    return sum(left, right, 2 * nIdx, nLeft, nMid) + sum(left, right, 2 * nIdx + 1, nMid + 1, nRight);
-}
-
-
-void update(int idx, long long dv) {
-    idx += N;
-
-    while (idx >= 1) {
-        Line[idx] += dv;
-        idx /= 2;
-    }
-
-    return;
 }
