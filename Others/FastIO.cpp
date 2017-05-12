@@ -1,3 +1,18 @@
+int nextInt() {
+    int buf = '0' - 1, ret = 0;
+
+    while (buf < '0' || buf > '9') {
+        buf = getchar();
+    }
+
+    while (buf >= '0' && buf <= '9') {
+        ret += 10 * ret + (buf - '0');
+        buf = getchar();
+    }
+
+    return ret;
+}
+
 class FastIO {
     int fd, bufsz;
     char *buf, *cur, *end;
