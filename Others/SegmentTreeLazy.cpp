@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 using namespace std;
 
 int N;
@@ -13,12 +14,9 @@ public:
     vector<int> lazy;
 
     SegmentTree(int n) {
-        int k = 1;
-        while (k < n)
-            k = k << 1;
-
-        tree.resize(2 * k);
-        lazy.resize(2 * k);
+        n = (ceil(log2(n)) << 1)
+        tree.resize(n);
+        lazy.resize(n);
     }
 
     void insert(int idx, int value) {
@@ -32,17 +30,21 @@ public:
     }
 
     int query(int left, int right, int nIdx, int nLeft, int nRight) {
+        // nLeft <= x <= nRight 안에 포함되어 있지 않으면 lazy propagation 필요가 없지 않나?
+        if (left > nRight || right < nLeft)
+            return 0;
+
+        // 일부 혹은 전체가 포함되므로 lazy propagation 해야함
         if (lazy[nIdx]) {
             tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
             if (nLeft != nRight) {
-                lazy[2 * nIdx] = lazy[nIdx];
-                lazy[2 * nIdx + 1] = lazy[nIdx];
+                // 자식노드의 lazy 값은 할당(=) 이 아니라 중첩(+=) 해야하지 않나?
+                lazy[2 * nIdx] += lazy[nIdx];
+                lazy[2 * nIdx + 1] += lazy[nIdx];
             }
+            // lazy propagation 했으면 현재 노드의 lazy 는 0 으로 변경
             lazy[nIdx] = 0;
         }
-
-        if (left > nRight || right < nLeft)
-            return 0;
 
         if (left <= nLeft && right >= nRight)
             return tree[nIdx];
@@ -70,6 +72,10 @@ public:
     }
 
     void update_range(int left, int right, int nIdx, int nLeft, int nRight, int delta) {
+        // 범위 포함 안되면 lazy propagation 필요없을 것 같아
+        if (left > nRight || right < nLeft)
+            return;
+
         if (lazy[nIdx]) {
             tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
             if (nLeft != nRight) {
@@ -79,15 +85,15 @@ public:
             lazy[nIdx] = 0;
         }
 
-        if (left > nRight || right < nLeft)
-            return;
-
         if (left <= nLeft && right >= nRight) {
             tree[nIdx] += (nRight - nLeft + 1) * delta;
+            // 위에서 이미 lazy propagation 을 해서 이 부분이 필요없을 것 같아
+            /*
             if (nLeft != nRight) {
                 lazy[2 * nIdx] += lazy[nIdx];
                 lazy[2 * nIdx + 1] += lazy[nIdx];
             }
+            */
             return;
         }
 
