@@ -8,35 +8,42 @@ int N, M, K;
 
 class SegmentTree {
 public:
+    int size;
     vector<long long> tree;
     vector<long long> lazy;
 
     SegmentTree(int n) {
-        n = 1 << (ceil(log2(n)) + 1);
+        n = 1 << int(ceil(log2(n)) + 1);
 
         tree.resize(n);
         lazy.resize(n);
+        size = n >> 1;
     }
 
     void insert(int idx, long long value) {
-        idx += tree.size() / 2;
+        idx += size;
         tree[idx] = value;
     }
 
     void init() {
-        for (int i = tree.size() / 2 - 1; i >= 1; --i)
-            tree[i] = tree[2 * i] + tree[2 * i + 1];
+        for (int i = size - 1; i >= 1; --i)
+            tree[i] = tree[(i << 1)] + tree[(i << 1) + 1];
+    }
+
+    void propagate(int nIdx, int nLeft, int nRight) {
+        if (lazy[nIdx]) {
+            if (nLeft != nRight) {
+                lazy[(nIdx << 1)] += lazy[nIdx];
+                lazy[(nIdx << 1) + 1] += lazy[nIdx];
+            }
+            
+            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
+            lazy[nIdx] = 0;
+        }
     }
 
     long long query(int left, int right, int nIdx, int nLeft, int nRight) {
-        if (lazy[nIdx]) {
-            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
-            if (nLeft != nRight) {
-                lazy[2 * nIdx] = lazy[nIdx];
-                lazy[2 * nIdx + 1] = lazy[nIdx];
-            }
-            lazy[nIdx] = 0;
-        }
+        propagate(nIdx, nLeft, nRight);
 
         if (left > nRight || right < nLeft)
             return 0;
@@ -44,19 +51,19 @@ public:
         if (left <= nLeft && right >= nRight)
             return tree[nIdx];
 
-        int nMid = nLeft + (nRight - nLeft) / 2;
-        long long leftRet = query(left, right, 2 * nIdx, nLeft, nMid);
-        long long rightRet = query(left, right, 2 * nIdx + 1, nMid + 1, nRight);
+        int nMid = nLeft + ((nRight - nLeft) >> 1);
+        long long leftRet = query(left, right, (nIdx << 1), nLeft, nMid);
+        long long rightRet = query(left, right, (nIdx << 1) + 1, nMid + 1, nRight);
 
         return leftRet + rightRet;
     }
-
+    
     long long query(int left, int right) {
-        return query(left, right, 1, 0, tree.size() / 2 - 1);
+        return query(left, right, 1, 0, size - 1);
     }
 
     void update(int idx, long long value) {
-        idx += tree.size() / 2;
+        idx += size;
         tree[idx] = value;
         idx /= 2;
 
@@ -67,35 +74,25 @@ public:
     }
 
     void update_range(int left, int right, int nIdx, int nLeft, int nRight, long long delta) {
-        if (lazy[nIdx]) {
-            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
-            if (nLeft != nRight) {
-                lazy[2 * nIdx] += lazy[nIdx];
-                lazy[2 * nIdx + 1] += lazy[nIdx];
-            }
-            lazy[nIdx] = 0;
-        }
+        propagate(nIdx, nLeft, nRight);
 
         if (left > nRight || right < nLeft)
             return;
 
         if (left <= nLeft && right >= nRight) {
-            tree[nIdx] += (nRight - nLeft + 1) * delta;
-            if (nLeft != nRight) {
-                lazy[2 * nIdx] += delta;
-                lazy[2 * nIdx + 1] += delta;
-            }
+            lazy[nIdx] = delta;
+            propagate(nIdx, nLeft, nRight);
             return;
         }
 
-        int nMid = nLeft + (nRight - nLeft) / 2;
-        update_range(left, right, 2 * nIdx, nLeft, nMid, delta);
-        update_range(left, right, 2 * nIdx + 1, nMid + 1, nRight, delta);
-        tree[nIdx] = tree[2 * nIdx] + tree[2 * nIdx + 1];
+        int nMid = nLeft + ((nRight - nLeft) >> 1);
+        update_range(left, right, (nIdx << 1), nLeft, nMid, delta);
+        update_range(left, right, (nIdx << 1) + 1, nMid + 1, nRight, delta);
+        tree[nIdx] = tree[(nIdx << 1)] + tree[(nIdx << 1) + 1];
     }
-
+    
     void update_range(int left, int right, long long delta) {
-        update_range(left, right, 1, 0, tree.size() / 2 - 1, delta);
+        update_range(left, right, 1, 0, size - 1, delta);
     }
 };
 
