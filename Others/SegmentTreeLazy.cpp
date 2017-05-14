@@ -10,41 +10,45 @@ int N;
 
 class SegmentTree {
 public:
+    int size;
     vector<int> tree;
     vector<int> lazy;
 
     SegmentTree(int n) {
-        n = (ceil(log2(n)) << 1)
-        tree.resize(n);
-        lazy.resize(n);
+        size = 1 << int(ceil(log2(n)));
+        tree.resize(2 * size);
+        lazy.resize(2 * size);
     }
 
     void insert(int idx, int value) {
-        idx += tree.size() / 2;
+        idx += size;
         tree[idx] = value;
     }
 
     void init() {
-        for (int i = tree.size() / 2 - 1; i >= 1; --i)
+        for (int i = size - 1; i >= 1; --i)
             tree[i] = tree[2 * i] + tree[2 * i + 1];
     }
 
+    void propagate(int nIdx, int nLeft, int nRight) {
+        if (lazy[nIdx]) {
+            if (nLeft != nRight) {
+                lazy[2 * nIdx] = lazy[nIdx];
+                lazy[2 * nIdx + 1] = lazy[nIdx];
+            }
+
+            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
+            lazy[nIdx] = 0;
+        }
+    }
+
     int query(int left, int right, int nIdx, int nLeft, int nRight) {
+        // 일부 혹은 전체가 포함되므로 lazy propagation 해야함
+        propagate(nIdx, nLeft, nRight);
+
         // nLeft <= x <= nRight 안에 포함되어 있지 않으면 lazy propagation 필요가 없지 않나?
         if (left > nRight || right < nLeft)
             return 0;
-
-        // 일부 혹은 전체가 포함되므로 lazy propagation 해야함
-        if (lazy[nIdx]) {
-            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
-            if (nLeft != nRight) {
-                // 자식노드의 lazy 값은 할당(=) 이 아니라 중첩(+=) 해야하지 않나?
-                lazy[2 * nIdx] += lazy[nIdx];
-                lazy[2 * nIdx + 1] += lazy[nIdx];
-            }
-            // lazy propagation 했으면 현재 노드의 lazy 는 0 으로 변경
-            lazy[nIdx] = 0;
-        }
 
         if (left <= nLeft && right >= nRight)
             return tree[nIdx];
@@ -57,11 +61,11 @@ public:
     }
 
     int query(int left, int right) {
-        return query(left, right, 1, 0, tree.size() / 2 - 1);
+        return query(left, right, 1, 0, size - 1);
     }
 
     void update(int idx, int value) {
-        idx += tree.size() / 2;
+        idx += size;
         tree[idx] = value;
         idx /= 2;
 
@@ -72,28 +76,15 @@ public:
     }
 
     void update_range(int left, int right, int nIdx, int nLeft, int nRight, int delta) {
+        propagate(nIdx, nLeft, nRight);
+
         // 범위 포함 안되면 lazy propagation 필요없을 것 같아
         if (left > nRight || right < nLeft)
             return;
 
-        if (lazy[nIdx]) {
-            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
-            if (nLeft != nRight) {
-                lazy[2 * nIdx] += lazy[nIdx];
-                lazy[2 * nIdx + 1] += lazy[nIdx];
-            }
-            lazy[nIdx] = 0;
-        }
-
         if (left <= nLeft && right >= nRight) {
-            tree[nIdx] += (nRight - nLeft + 1) * delta;
-            // 위에서 이미 lazy propagation 을 해서 이 부분이 필요없을 것 같아
-            /*
-            if (nLeft != nRight) {
-                lazy[2 * nIdx] += lazy[nIdx];
-                lazy[2 * nIdx + 1] += lazy[nIdx];
-            }
-            */
+            lazy[nIdx] = delta;
+            propagate(nIdx, nLeft, nRight);
             return;
         }
 
@@ -104,51 +95,55 @@ public:
     }
 
     void update_range(int left, int right, int delta) {
-        update_range(left, right, 1, 0, tree.size() / 2 - 1, delta);
+        update_range(left, right, 1, 0, size - 1, delta);
     }
 };
 
 class FenwickTree {
 public:
-    vector<int> tree;
+    vector<int> tree1;
+    vector<int> tree2;
 
     FenwickTree(int n) {
-        // 전체 크기에 1만 더 필요하다. 1~N 까지 데이터를 저장한다.
-        tree.resize(n + 1);
+        tree1.resize(n + 1);
+        tree2.resize(n + 1);
     }
 
-    // query(): 메인함수에서 호출할 때 0~idx 까지의 합을 출력한다.
-    int query(int idx) {
-        // 외부에서의 인덱스번호 시작은 0, 펜윅트리에서는 1부터 시작하므로, 1을 더해줘서 인덱스를 맞춘다.
-        idx++;
+    int query(vector<int>& tree, int idx) {
         int ret = 0;
 
         while (idx > 0) {
-            // idx 의 커버리지 부분합을 더한다.
             ret += tree[idx];
-            // idx 의 커버리지 앞부분의 인덱스로 이동한다.
             idx &= (idx - 1);
         }
 
         return ret;
     }
 
-    // query(): 메인함수에서 호출할 때 sIdx~eIdx 까지의 합을 출력한다.
-    int query(int sIdx, int eIdx) {
+    int query(int idx) {
+        return query(tree1, idx) * idx - query(tree2, idx);
+    }
+
+    int query_range(int sIdx, int eIdx) {
+        sIdx++;
+        eIdx++;
         return query(eIdx) - query(sIdx - 1);
     }
 
-    // update(): idx (0부터 시작) 에 delta 만큼을 더해준다.
-    void update(int idx, int delta) {
-        // 외부에서의 인덱스번호 시작은 0, 펜윅트리에서는 1부터 시작하므로, 1을 더해줘서 인덱스를 맞춘다.
-        idx++;
-
-        // idx 에서 상위로 올라가는 경로 안의 모든 것들에 대해 delta 를 더해주어야 한다.
+    void update(vector<int>& tree, int idx, int delta) {
         while (idx < tree.size()) {
             tree[idx] += delta;
-            // 이번 커버리지가 끝나고 다음 상위 커버리지로 이동한다.
             idx += (idx & -idx);
         }
+    }
+
+    void update_range(int sIdx, int eIdx, int delta) {
+        sIdx++;
+        eIdx++;
+        update(tree1, sIdx, delta);
+        update(tree1, eIdx + 1, -delta);
+        update(tree2, sIdx, delta * (sIdx - 1));
+        update(tree2, eIdx + 1, -delta * eIdx);
     }
 };
 
@@ -158,29 +153,28 @@ int main() {
 
     cin >> N;
     SegmentTree st = SegmentTree(N);
-    // FenwickTree ft = FenwickTree(N);
+    FenwickTree ft = FenwickTree(N);
 
     for (int i = 0; i < N; i++) {
         int buf;
         cin >> buf;
         st.insert(i, buf);
-        // ft.update(i, buf);
+        ft.update_range(i, i, buf);
     }
 
     st.init();
 
-
-
-    cout << st.query(2, 2) << '\n';
-    // cout << ft.query(2, 2) << '\n';
-
-    cout << st.query(0, 3) << '\n';
-    // cout << ft.query(0, 3) << '\n';
-
-    cout << st.query(0, N) << '\n';
-    // cout << ft.query(0, N) << '\n';
-
     st.update_range(1, 3, 5);
+    ft.update_range(1, 3, 5);
+
+    cout << st.query(0, 4) << endl;
+    cout << ft.query_range(0, 4) << endl;
+
+    st.update_range(2, 9, -1);
+    ft.update_range(2, 9, -1);
+
+    cout << st.query(3, 9) << endl;
+    cout << ft.query_range(3, 9) << endl;
 
     return 0;
 }

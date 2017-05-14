@@ -36,7 +36,7 @@ public:
                 lazy[(nIdx << 1)] += lazy[nIdx];
                 lazy[(nIdx << 1) + 1] += lazy[nIdx];
             }
-            
+
             tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
             lazy[nIdx] = 0;
         }
@@ -57,7 +57,7 @@ public:
 
         return leftRet + rightRet;
     }
-    
+
     long long query(int left, int right) {
         return query(left, right, 1, 0, size - 1);
     }
@@ -90,7 +90,7 @@ public:
         update_range(left, right, (nIdx << 1) + 1, nMid + 1, nRight, delta);
         tree[nIdx] = tree[(nIdx << 1)] + tree[(nIdx << 1) + 1];
     }
-    
+
     void update_range(int left, int right, long long delta) {
         update_range(left, right, 1, 0, size - 1, delta);
     }
