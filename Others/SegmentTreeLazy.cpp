@@ -75,7 +75,7 @@ public:
         }
     }
 
-    void update_range(int left, int right, int nIdx, int nLeft, int nRight, int delta) {
+    void update(int left, int right, int nIdx, int nLeft, int nRight, int delta) {
         propagate(nIdx, nLeft, nRight);
 
         // 범위 포함 안되면 lazy propagation 필요없을 것 같아
@@ -89,13 +89,13 @@ public:
         }
 
         int nMid = nLeft + (nRight - nLeft) / 2;
-        update_range(left, right, 2 * nIdx, nLeft, nMid, delta);
-        update_range(left, right, 2 * nIdx + 1, nMid + 1, nRight, delta);
+        update(left, right, 2 * nIdx, nLeft, nMid, delta);
+        update(left, right, 2 * nIdx + 1, nMid + 1, nRight, delta);
         tree[nIdx] = tree[2 * nIdx] + tree[2 * nIdx + 1];
     }
 
-    void update_range(int left, int right, int delta) {
-        update_range(left, right, 1, 0, size - 1, delta);
+    void update(int left, int right, int delta) {
+        update(left, right, 1, 0, size - 1, delta);
     }
 };
 
@@ -121,12 +121,11 @@ public:
     }
 
     int query(int idx) {
+        idx++;
         return query(tree1, idx) * idx - query(tree2, idx);
     }
 
-    int query_range(int sIdx, int eIdx) {
-        sIdx++;
-        eIdx++;
+    int query(int sIdx, int eIdx) {
         return query(eIdx) - query(sIdx - 1);
     }
 
@@ -137,7 +136,7 @@ public:
         }
     }
 
-    void update_range(int sIdx, int eIdx, int delta) {
+    void update(int sIdx, int eIdx, int delta) {
         sIdx++;
         eIdx++;
         update(tree1, sIdx, delta);
@@ -159,22 +158,43 @@ int main() {
         int buf;
         cin >> buf;
         st.insert(i, buf);
-        ft.update_range(i, i, buf);
+        ft.update(i, i, buf);
     }
 
     st.init();
 
-    st.update_range(1, 3, 5);
-    ft.update_range(1, 3, 5);
+    // cout << st.query(0, 7) << endl;
+    // cout << ft.query(0, 7) << endl;
 
-    cout << st.query(0, 4) << endl;
-    cout << ft.query_range(0, 4) << endl;
+    st.update(1, 3, 5);
+    ft.update(1, 3, 5);
 
-    st.update_range(2, 9, -1);
-    ft.update_range(2, 9, -1);
+    // cout << st.query(0, 7) << endl;
+    // cout << ft.query(0, 7) << endl;
 
-    cout << st.query(3, 9) << endl;
-    cout << ft.query_range(3, 9) << endl;
+    // cout << st.query(2, 5) << endl;
+    // cout << ft.query(2, 5) << endl;
+
+    st.update(6, 7, -3);
+    ft.update(6, 7, -3);
+
+    cout << st.query(0, 7) << endl;
+    cout << ft.query(0, 7) << endl;
+
+    cout << st.query(2, 5) << endl;
+    cout << ft.query(2, 5) << endl;
+
+    for (int i = 0; i < 8; ++i)
+        cout << st.query(i, i) << ' ' << ft.query(i, i) << endl;
+
+    // cout << st.query(0, 4) << endl;
+    // cout << ft.query_range(0, 4) << endl;
+
+    // st.update_range(2, 9, -1);
+    // ft.update_range(2, 9, -1);
+
+    // cout << st.query(3, 9) << endl;
+    // cout << ft.query_range(3, 9) << endl;
 
     return 0;
 }
