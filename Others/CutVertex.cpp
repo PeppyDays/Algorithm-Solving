@@ -63,7 +63,7 @@ int findCutVertex(int here, bool isRoot, int& counter, vector<vector<int> >& adj
             // 모든 child 에 역방향 간선이 있어야 단절점이 아닌데, 1개라도 역방향 간선이 없다면 단절점임
             if (!isRoot && subRet >= discovered[here])
                 isCutVertex[here] = true;
-            
+
             // here 에서 갈 수 있는 가장 빠른 발견순서 업데이트
             ret = min(ret, subRet);
         }
@@ -78,6 +78,6 @@ int findCutVertex(int here, bool isRoot, int& counter, vector<vector<int> >& adj
     // 만약 here 가 root 라면, child 개수에 따라 단절점 여부가 정의된다.
     if (isRoot)
         isCutVertex[here] = (childCnt >= 2);
-    
+
     return ret;
 }

@@ -13,9 +13,7 @@ public:
 
     SegmentTree(int n) {
         // k 에 n 보다 크거나 같은 2의 제곱수 중 가장 작은수를 찾아서 저장한다.
-        int k = 1;
-        while (k < n)
-            k = k << 1;
+        int k = 1 << int(ceil(log2(n)));
 
         // SegmentTree 생성을 위해 2배로 배열을 할당한다.
         tree.resize(2 * k);
