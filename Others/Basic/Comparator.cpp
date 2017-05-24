@@ -16,13 +16,13 @@ public:
     }
 };
 
-bool operator < (const NumBox& a, const NumBox& b) {
-    return a.number < b.number;
-}
+// bool operator < (const NumBox& a, const NumBox& b) {
+//     return a.number < b.number;
+// }
 
-bool operator > (const NumBox& a, const NumBox& b) {
-    return a.number > b.number;
-}
+// bool operator > (const NumBox& a, const NumBox& b) {
+//     return a.number > b.number;
+// }
 
 class CompareBy {
 public:
