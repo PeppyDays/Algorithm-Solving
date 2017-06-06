@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <vector>
 #include <cmath>
 using namespace std;
 
@@ -15,38 +14,35 @@ int nextInt() {
     int ret = 0;
     bool sign = true;
 
-    while ((*o < '0' || *o > '9') && *o != '-') ++o;
-    if (*o == '-') { sign = false; o++; };
+    while (*o < '0' || *o > '9') ++o;
     while (*o >= '0' && *o <= '9') ret = 10 * ret + *o++ - '0';
 
-    return sign ? ret : -ret;
+    return ret;
 }
 
-const int MaxN = 100000, MaxM = 100000;
+const int MaxN = 1<<17;
 
 int N, M;
 
 class SegmentTree {
 public:
     int size;
-    vector<int> tree;
-    vector<int> lazy;
+    int tree[2 * MaxN];
+    bool lazy[2 * MaxN];
 
     SegmentTree(int n) {
         size = 1 << int(ceil(log2(n)));
-        tree.resize(2 * size);
-        lazy.resize(2 * size);
     }
 
     void propagate(int nIdx, int nLeft, int nRight) {
         if (lazy[nIdx]) {
             if (nLeft != nRight) {
-                lazy[2 * nIdx] += lazy[nIdx];
-                lazy[2 * nIdx + 1] += lazy[nIdx];
+                lazy[2 * nIdx] ^= 1;
+                lazy[2 * nIdx + 1] ^= 1;
             }
 
-            tree[nIdx] += (nRight - nLeft + 1) * lazy[nIdx];
-            lazy[nIdx] = 0;
+            tree[nIdx] = (nRight - nLeft + 1) - tree[nIdx];
+            lazy[nIdx] = false;
         }
     }
 
@@ -66,62 +62,43 @@ public:
         return retLeft + retRight;
     }
 
-    void update(int left, int right, int nIdx, int nLeft, int nRight, int delta) {
+    void update(int left, int right, int nIdx, int nLeft, int nRight) {
         propagate(nIdx, nLeft, nRight);
 
         if (left > nRight || right < nLeft)
             return;
 
         if (left <= nLeft && right >= nRight) {
-            lazy[nIdx] = delta;
+            lazy[nIdx] ^= 1;
             propagate(nIdx, nLeft, nRight);
             return;
         }
 
         int nMid = nLeft + (nRight - nLeft) / 2;
-        update(left, right, 2 * nIdx, nLeft, nMid, delta);
-        update(left, right, 2 * nIdx + 1, nMid + 1, nRight, delta);
+        update(left, right, 2 * nIdx, nLeft, nMid);
+        update(left, right, 2 * nIdx + 1, nMid + 1, nRight);
         tree[nIdx] = tree[2 * nIdx] + tree[2 * nIdx + 1];
-    }
-
-    void toggle(int left, int right) {
-        int switchSum = query(left, right, 1, 0, size - 1);
-
-        if (switchSum == right - left + 1)
-            update(left, right, 1, 0, size - 1, -1);
-        else if (switchSum == 0)
-            update(left, right, 1, 0, size - 1, 1);
-        else {
-            int mid = left + (right - left) / 2;
-            toggle(left, mid);
-            toggle(mid + 1, right);
-        }
     }
 };
 
 int main() {
     freopen("resources/input.in", "r", stdin);
-    // getIn();
-    // N = nextInt();
-    // M = nextInt();
-    scanf("%d %d", &N, &M);
+    getIn();
+    N = nextInt();
+    M = nextInt();
 
     SegmentTree st = SegmentTree(N);
 
     int q, s, e;
     while (M--) {
-        // q = nextInt();
-        // s = nextInt() - 1;
-        // e = nextInt() - 1;
-        scanf("%d %d %d", &q, &s, &e);
-        s--; e--;
+        q = nextInt();
+        s = nextInt() - 1;
+        e = nextInt() - 1;
 
-        if (q) {
+        if (q)
             printf("%d\n", st.query(s, e, 1, 0, st.size - 1));
-        }
-        else {
-            st.toggle(s, e);
-        }
+        else
+            st.update(s, e, 1, 0, st.size - 1);
     }
 
     return 0;
