@@ -33,7 +33,10 @@ int find(int u);
 void merge(int u, int v);
 
 int main() {
+<<<<<<< HEAD
     freopen("resources/input.in", "r", stdin);
+=======
+>>>>>>> ecd03fb8e38cb385f61717f4df26389359fb85d9
     getIn();
 
     N = nextInt();
@@ -100,3 +103,4 @@ void merge(int u, int v) {
     if (depth[u] == depth[v])
         ++depth[u];
 }
+
