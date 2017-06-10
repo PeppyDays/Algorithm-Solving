@@ -1,6 +1,24 @@
-#include <iostream>
+#include <cstdio>
 #include <algorithm>
 using namespace std;
+
+char in[10000000];
+const char* o;
+
+void getIn() {
+    o = in;
+    in[fread(in, 1, sizeof(in) - 4, stdin)] = '\n';
+}
+
+int nextInt() {
+    int ret = 0;
+    bool sign = true;
+
+    while (*o < '0' || *o > '9') ++o;
+    while (*o >= '0' && *o <= '9') ret = 10 * ret + *o++ - '0';
+
+    return ret;
+}
 
 typedef pair<int, pair<int, int> > couple;
 const int MaxN = 1000, MaxM = 100000;
@@ -14,15 +32,18 @@ int depth[MaxN];
 int find(int u);
 void merge(int u, int v);
 
-int main(int argc, char* argv[]) {
-    ios_base::sync_with_stdio(false);
+int main() {
+    freopen("resources/input.in", "r", stdin);
+    getIn();
 
-    cin >> N >> M;
+    N = nextInt();
+    M = nextInt();
 
     int u, v, c;
-
     for (int i = 0; i < M; ++i) {
-        cin >> u >> v >> c;
+        u = nextInt();
+        v = nextInt();
+        c = nextInt();
         edge[i] = make_pair(c, make_pair(u - 1, v - 1));
     }
 
@@ -33,7 +54,8 @@ int main(int argc, char* argv[]) {
 
     sort(edge, edge + M);
 
-    int cntSelected = 0, costSelected = 0;
+    int cntMergeNode = 1;
+    int costLine = 0;
 
     for (int i = 0; i < M; ++i) {
         c = edge[i].first, u = edge[i].second.first, v = edge[i].second.second;
@@ -44,14 +66,14 @@ int main(int argc, char* argv[]) {
             continue;
 
         merge(u, v);
-        cntSelected += 1;
-        costSelected += c;
+        cntMergeNode += 1;
+        costLine += c;
 
-        if (cntSelected == N - 1)
+        if (cntMergeNode == N)
             break;
     }
 
-    cout << costSelected << '\n';
+    printf("%d\n", costLine);
 
     return 0;
 }
