@@ -1,19 +1,14 @@
 #include <cstdio>
+#include <string>
 using namespace std;
+
+
 
 class Barcode {
 public:
     char code[95];
     char codeL[6][7];
     char codeR[6][7];
-    char patternL[10][7];
-    char patternR[10][7];
-
-    Barcode() {
-        patternL[0] = {
-
-        };
-    }
 
     void setCode(int i, char c) {
         code[i] = c;
