@@ -27,11 +27,18 @@ const char patternR[10][7] = {
     {'1', '1', '1', '0', '1', '0', '0'}
 };
 
+const char patternS[3] = {'1', '0', '1'};
+const char patternE[3] = {'1', '0', '1'};
+const char patternM[5] = {'0', '1', '0', '1', '0'};
+
 class Barcode {
 public:
     char code[95];
     char codeL[6][7];
     char codeR[6][7];
+    char codeS[3];
+    char codeM[5];
+    char codeE[3];
     int matchL[6];
     int matchR[6];
 
@@ -40,23 +47,49 @@ public:
     }
 
     void setCodeLR() {
-        int codeIdx = 3;
+        int codeIdx = 0;
+
+        for (int i = 0; i < 3; ++i)
+            codeS[i] = code[codeIdx++];
 
         for (int i = 0; i < 6; ++i)
             for (int j = 0; j < 7; ++j)
                 codeL[i][j] = code[codeIdx++];
 
-        codeIdx += 5;
+        for (int i = 0; i < 5; ++i)
+            codeM[i] = code[codeIdx++];
 
         for (int i = 0; i < 6; ++i)
             for (int j = 0; j < 7; ++j)
                 codeR[i][j] = code[codeIdx++];
+
+        for (int i = 0; i < 3; ++i)
+            codeE[i] = code[codeIdx++];
     }
 
     void reverse() {
         char temp[95];
         for (int i = 0; i < 95; ++i) temp[i] = code[i];
         for (int i = 0; i < 95; ++i) code[i] = temp[94 - i];
+    }
+
+    bool setMatchSME() {
+        for (int i = 0; i < 3; ++i) {
+            if (codeS[i] != '?' && codeS[i] != patternS[i])
+                return false;
+        }
+
+        for (int i = 0; i < 5; ++i) {
+            if (codeM[i] != '?' && codeM[i] != patternM[i])
+                return false;
+        }
+
+        for (int i = 0; i < 3; ++i) {
+            if (codeE[i] != '?' && codeE[i] != patternE[i])
+                return false;
+        }
+
+        return true;
     }
 
     bool setMatchLR() {
@@ -133,7 +166,7 @@ int main() {
         barcode.setCodeLR();
         retNonIdx = 0;
 
-        if (barcode.setMatchLR()) {
+        if (barcode.setMatchSME() && barcode.setMatchLR()) {
             for (int l0 = 0; l0 < 10; ++l0) {
                 if (!(barcode.matchL[0] & (1 << l0))) continue;
 
@@ -227,7 +260,7 @@ int main() {
         barcode.setCodeLR();
         retRevIdx = 0;
 
-        if (barcode.setMatchLR()) {
+        if (barcode.setMatchSME() && barcode.setMatchLR()) {
             for (int l0 = 0; l0 < 10; ++l0) {
                 if (!(barcode.matchL[0] & (1 << l0))) continue;
 
