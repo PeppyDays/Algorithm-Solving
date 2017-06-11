@@ -103,4 +103,3 @@ void merge(int u, int v) {
     if (depth[u] == depth[v])
         ++depth[u];
 }
-
