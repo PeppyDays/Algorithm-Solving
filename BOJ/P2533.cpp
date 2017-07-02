@@ -1,69 +1,80 @@
-#include    <cstdio>
-#include    <vector>
-#include    <algorithm>
-#pragma warning (disable : 4996)
+#include <cstdio>
+#include <vector>
+#include <cstring>
+#include <algorithm>
+using namespace std;
 
-struct tree
-{
-    int rank;
-    int none, early;
-    std::vector<int> ad_vertex;
-};
-int q[1111111];
-int st[1111111];
-int visit[1111111];
-tree t[1111111];
-int top = 0;
-int front = 0, rear = 0;
+char in[2000000];
+const char* o;
 
-int main()
-{
-    int N;
-    scanf("%d", &N);
-    if (N == 1)
-    {
-        printf("1");
-        return 0;
+void getIn() {
+    o = in;
+    in[fread(in, 1, sizeof(in) - 4, stdin)] = '\n';
+}
+
+int nextInt() {
+    int ret = 0;
+    while (*o < '0' || *o > '9') ++o;
+    while (*o >= '0' && *o <= '9') ret = 10 * ret + *o++ - '0';
+    return ret;
+}
+
+const int MaxN = 1000001;
+
+int N, cache[MaxN][2];
+bool check[MaxN];
+vector<int> child[MaxN];
+
+int get(int node, bool early);
+
+int main() {
+    freopen("resources/input.in", "r", stdin);
+    memset(cache, -1, sizeof(cache));
+    memset(check, 0, sizeof(check));
+    getIn();
+
+    N = nextInt();
+
+    int u, v;
+    for (int i = 0; i < N - 1; ++i) {
+        u = nextInt(); v = nextInt();
+        child[u].push_back(v);
+        child[v].push_back(u);
     }
-    int v, u;
-    for (int i = 1; i < N; ++i)
-    {
-        scanf("%d%d", &v, &u);
-        t[v].ad_vertex.push_back(u);
-        t[u].ad_vertex.push_back(v);
-    }
-    int T = 1; //루트노드
-               //BFS
-    int r = 1;
-    visit[T] = 1;
-    st[++top] = T;
-    q[++rear] = T; //루트 노드
-    while (front <= rear)
-    {
-        int node = q[++front];
-        t[node].rank = r++; //탐색하여 탐색우선순위 지정.
-        for (std::vector<int>::iterator it = t[node].ad_vertex.begin(); it != t[node].ad_vertex.end(); ++it)
-        {
-            if (visit[*it] != 1) //방문하지 않았다면
-            {
-                visit[*it] = 1;
-                q[++rear] = *it;
-                st[++top] = *it;
-            }
-        }
-    }
-    for (int i = top; i > 0; --i)
-    {
-        int index = st[i];
-        t[index].none = 0;
-        t[index].early = 1;
-        for (int j = 0; j < t[index].ad_vertex.size(); ++j)
-        {
-            int chlidIdx = t[index].ad_vertex[j];
-            t[index].none += t[chlidIdx].early;
-            t[index].early += std::min(t[chlidIdx].early, t[chlidIdx].none);
-        }
-    }
-    printf("%d", std::min(t[T].none, t[T].early));
+
+    int answer = min(get(1, false), get(1, true));
+    printf("%d", answer);
+
     return 0;
+}
+
+// 시작노드 번호, 시작노드의 얼리어답터 여부 -> 최소의 early adapter 수
+int get(int node, bool early) {
+    check[node] = true;
+
+    // leaf node 인 경우
+    if (child[node].size() == 0)
+        return early;
+
+    if (cache[node][early] != -1)
+        return cache[node][early];
+
+    int& ret = cache[node][early];
+
+    // 자신이 early adapter 인 경우, 자손들은 early adapter 가 아니다.
+    if (early) {
+        ret = 1;
+        for (int c = 0; c < child[node].size(); ++c)
+            if (!check[child[node][c]])
+                ret += min(get(child[node][c], false), get(child[node][c], true));
+    }
+    else {
+        ret = 0;
+        for (int c = 0; c < child[node].size(); ++c)
+            if (!check[child[node][c]])
+                ret += get(child[node][c], true);
+    }
+
+    check[node] = false;
+    return ret;
 }
