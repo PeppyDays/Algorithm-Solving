@@ -8,6 +8,18 @@ int main() {
     ios_base::sync_with_stdio(false);
     freopen("/Users/Donald/Documents/Algorithm-Solving/resources/input.in", "r", stdin);
 
+    // 7 10
+    // 0 1
+    // 1 2
+    // 0 4
+    // 4 2
+    // 2 0
+    // 0 5
+    // 5 3
+    // 5 6
+    // 6 3
+    // 0 6
+
     int n, e, counter = 1;
     cin >> n >> e;
 
