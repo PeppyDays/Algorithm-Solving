@@ -2,17 +2,26 @@
 #include <cstring>
 #include <algorithm>
 #include <stack>
+#include <vector>
 using namespace std;
 
 typedef pair<int, int> couple;
-// const int MaxN = 50000;
-// const int MaxL = 1000000;
-const int MaxN = 10;
-const int MaxL = 100;
 
 int N;
-long Cache[MaxN];
-couple Rect[MaxN];
+vector<couple> Rect;
+vector<couple> Line;
+vector<long long> Cache[MaxN];
+
+double cross(couple u, couple v) {
+    return (double)(u.second - v.second) / (v.first - u.first);
+}
+
+void push(couple u) {
+    while (Line.size() >= 2 && cross(u, Line.rbegin()[0]) < cross(u, Line.rbegin()[1]))
+        Line.pop_back();
+
+    Line.push_back(u);
+}
 
 int main() {
     freopen("resources/input.in", "r", stdin);
@@ -20,14 +29,14 @@ int main() {
 
     cin >> N;
 
-    for (int i = 0; i < N; ++i)
+    for (int i = 1; i <= N; ++i)
         cin >> Rect[i].first >> Rect[i].second;
 
-    sort(Rect, Rect + N);
+    sort(Rect + 1, Rect + N + 1);
 
     stack<couple> s;
-    for (int i = 0; i < N; ++i) {
-        while (!s.empty() && Rect[i].second < s.top().second)
+    for (int i = 1; i <= N; ++i) {
+        while (!s.empty() && Rect[i].second > s.top().second)
             s.pop();
 
         s.push(Rect[i]);
@@ -35,13 +44,18 @@ int main() {
 
     N = 0;
     while (!s.empty()) {
-        Rect[N] = s.top();
+        Rect[N + 1] = s.top();
         s.pop();
         N += 1;
     }
 
-    for (int i = 0; i < N; ++i)
-        cout << Rect[i].first << ' ' << Rect[i].second << endl;
+    // for (int i = 1; i <= N; ++i)
+    //     cout << Rect[i].first << ' ' << Rect[i].second << endl;
+
+
+
+
+
 
 
     return 0;
