@@ -1,47 +1,61 @@
 #include <cstdio>
 #include <algorithm>
-using namespace std;
+#define MAX_SIZE 200000
+ 
+char in[20000000];
+const char* o;
 
-const int MaxN = 200001;
-int N, C, H[MaxN];
-
-bool check(int mid, int k);
-
-int main() {
-    freopen("resources/input.in", "r", stdin);
-    scanf("%d %d", &N, &C);
-    for (int i = 0; i < N; ++i)
-        scanf("%d", H + i);
-
-    sort(H, H + N);
-
-    int start = 1, end = H[N - 1] - H[0], Answer = 1, mid;
-    while (start <= end) {
-        mid = start + (end - start) / 2;
-
-        if (check(mid, C)) {
-            if (Answer < mid) Answer = mid;
-            start = mid + 1;
-        }
-        else {
-            end = mid - 1;
-        }
-
-        printf("%d", Answer);
-        return 0;
-    }
-
-
-    return 0;
+void getIn() {
+    o = in;
+    in[fread(in, 1, sizeof(in) - 4, stdin)] = '\n';
 }
 
-bool check(int mid, int k) {
-    int cnt = 1, start = H[0];
+int nextInt() {
+    int ret = 0;
+    while (*o < '0' || *o > '9') ++o;
+    while (*o >= '0' && *o <= '9') ret = 10 * ret + *o++ - '0';
+    return ret;
+}
 
-    for (int i = 1; i < N; ++i)
-        if (H[i] - start >= mid) {
-            cnt++; start = H[i];
+int pos[MAX_SIZE];
+ 
+int main() {
+    getIn();
+    int n, c;
+    // scanf("%d %d", &n, &c);
+    n = nextInt();
+    c = nextInt();
+ 
+    for(int i = 0; i < n; i++)
+        // scanf("%d", pos + i);
+        pos[i] = nextInt();
+ 
+    std::sort(pos, pos + n);
+ 
+    int left = 1, right = pos[n - 1] - pos[0];
+    int ret;
+ 
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        int cnt = 1;
+        int start = pos[0];
+
+        for (int i = 1; i < n; i++) {
+            if (pos[i] - start >= mid) {
+                cnt++;
+                start = pos[i];
+            }
         }
-
-    return cnt >= k;
+ 
+        if (cnt >= c) {
+            ret = mid;
+            left = mid + 1;
+        }
+        else
+            right = mid - 1;
+    }
+ 
+    printf("%d\n", ret);
+ 
+    return 0;
 }
