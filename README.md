@@ -9,6 +9,6 @@
 
 ## 사용 언어
 
-- Python 3.5
+- Python 3.6
 - Java 8
 - C++
